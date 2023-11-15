@@ -1,0 +1,207 @@
+---
+title: "Multi-Day Events"
+author: "Homer White"
+format: html
+---
+
+```{r}
+#| include: false
+library(tidyverse)
+library(reactable)
+```
+
+## Data Import
+
+We read in the data and remove columsn that we won't need.  We also change some column names to valid names in R:
+
+```{r}
+cal <- 
+  read_csv(
+  "from_christara/cal.csv", 
+  col_types = cols(
+    `Start Date` = col_date(format = "%d/%m/%Y"), 
+    `End Date` = col_date(format = "%d/%m/%Y")
+    )
+  ) %>% 
+  .[, 1:6]
+names(cal) <- c(
+  "event_name",
+  "start_date",
+  "start_time",
+  "end_date",
+  "end_time",
+  "all_day"
+)
+```
+
+**Caution**:  Some of the event-names use characters that are not in the UTF-8 encoding system:
+
+```{r}
+invalid_utf8_ <- function(x){
+  !is.na(x) & is.na(iconv(x, "UTF-8", "UTF-8"))
+}
+baddies <-
+  cal %>% 
+  filter(invalid_utf8_(event_name)) %>% 
+  pull(event_name)
+baddies
+```
+
+If this is an issue for package **toastui**, then you will need to research how to modify those names.  But this article focuses on handling multi-day events, so I'll just take them out:
+
+```{r}
+cal <- 
+  cal %>% 
+  filter(!invalid_utf8_(event_name))
+```
+
+
+
+Let's examine the structure of the data frame:
+
+```{r}
+str(cal)
+```
+
+
+**Note**:  `read_csv()` uses a parser that was able to correctly detect the start and end times, and the event duration, as times.  On the other hand, I had to provide the correct format for the dates.  (See [here](https://readr.tidyverse.org/reference/parse_datetime.html) for details.)
+
+
+## Compressing Multi-Day Events
+
+We'll make the simplifying assumption that the only rows that are part of a multi-day event are the rows that are listed in the data as being `all_day`.
+
+Our aim is to take rows that have the same value of `subject` and combine them as needed into multi-day events, where each multi-day event is comprised of the larget possible set of rows such that the values of `start_date` are consecutive.
+
+For example, consider the final-exam events:
+
+```{r}
+finals <-
+  cal %>% 
+  filter(event_name == "Final Exams")
+```
+
+```{r}
+#| echo: false
+reactable(finals)
+```
+
+
+We want to derive the following multi-day events:
+
+* Fall 2022 finals:  December 8-9;
+* Fall 2022 finals continued after the weekend:  December 12-13;
+* Spring 2023 finals:  May 5;
+* Spring 2023 finals continued:  May 8-10;
+* Fall 2023 finals:  December 5-6.
+
+We aim to write a function to produce one data frame of events, with multi-day events occupying just one row each.
+
+First, we'll write a utility function to decide, for a sorted vector of integers, what "group" of consecutive integers each integer belongs to:
+
+```{r}
+find_group <- function(vec) {
+  n <- length(vec)
+  if (n == 1) return(1)
+  group <- numeric(n)
+  group[1] <- 1
+  group_number <- 1
+  for (i in 2:n) {
+    if (vec[i] - vec[i-1] == 1) {
+      group[i] <- group_number
+    } else {
+      group[i] <- group_number + 1
+      group_number <- group_number + 1
+    }
+  }
+  group
+}
+```
+
+Try it out:
+
+```{r}
+sample_vec <- c(0, 1, 2, 5, 6, 10, 11, 12, 15)
+data.frame(
+  item = sample_vec,
+  group = find_group(sample_vec)
+)
+```
+
+Write a function to compress rows that correspond to one multi-day event into a single row:
+
+```{r}
+compress_one_event <- function(df) {
+  n <- df %>% nrow()
+  event <- df %>% slice(1)
+  event[, "end_date"] <- df[n, "end_date"]
+  event[, "end_time"] <- df[n, "end_time"]
+  event
+}
+```
+
+
+Now for the desired compressor function:
+
+
+```{r}
+compress_events <- function(df) {
+  df %>% ungroup()
+  first_day <- min(df %>% pull(start_date))
+  df2 <- 
+    df %>% 
+    arrange(start_date) %>% 
+    mutate(day_diff = as.numeric(start_date - first_day))
+  df2$dg <- find_group(df2 %>% pull(day_diff))
+  df2 %>% 
+    split(f = df2$dg) %>% 
+    map_dfr(compress_one_event) %>% 
+    select(-c(day_diff, dg))
+}
+```
+
+**Note**:  I learned that `map_dfr()` is now superseded so we are supposed to starting learning new ways to do it, see [here](https://purrr.tidyverse.org/reference/map_dfr.html).
+
+Anyhoo, try it out:
+
+
+```{r}
+results <- compress_events(finals)
+```
+
+```{r}
+#| echo: false
+reactable(results)
+```
+
+## Processing All the Events
+
+Now process all the rows of the calendar data table:
+
+```{r}
+single_day_for_sure <-
+  cal %>% 
+  filter(!all_day)
+might_require_compression <-
+  cal %>% 
+  filter(all_day)
+compressed <-
+  might_require_compression %>% 
+  split(f = might_require_compression$event_name) %>% 
+  map_dfr(compress_events)
+toasted <-
+  single_day_for_sure %>% 
+  bind_rows(compressed) %>% 
+  arrange(start_date, start_time)
+```
+
+```{r}
+#| echo: false
+reactable(toasted)
+```
+
+
+
+
+
+

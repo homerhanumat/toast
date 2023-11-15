@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.489">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Homer White">
+
+<title>Multi-Day Events</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="index_files/libs/clipboard/clipboard.min.js"></script>
+<script src="index_files/libs/quarto-html/quarto.js"></script>
+<script src="index_files/libs/quarto-html/popper.min.js"></script>
+<script src="index_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="index_files/libs/quarto-html/anchor.min.js"></script>
+<link href="index_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="index_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="index_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="index_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="index_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="index_files/libs/core-js-2.5.3/shim.min.js"></script>
+<script src="index_files/libs/react-18.2.0/react.min.js"></script>
+<script src="index_files/libs/react-18.2.0/react-dom.min.js"></script>
+<script src="index_files/libs/reactwidget-1.0.0/react-tools.js"></script>
+<script src="index_files/libs/htmlwidgets-1.6.2/htmlwidgets.js"></script>
+<link href="index_files/libs/reactable-0.4.4/reactable.css" rel="stylesheet">
+<script src="index_files/libs/reactable-binding-0.4.4/reactable.js"></script>
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Multi-Day Events</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Homer White </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="data-import" class="level2">
+<h2 class="anchored" data-anchor-id="data-import">Data Import</h2>
+<p>We read in the data and remove columsn that we won’t need. We also change some column names to valid names in R:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>cal <span class="ot">&lt;-</span> </span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">read_csv</span>(</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"from_christara/cal.csv"</span>, </span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">col_types =</span> <span class="fu">cols</span>(</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">Start Date</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">col_date</span>(<span class="at">format =</span> <span class="st">"%d/%m/%Y"</span>), </span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">End Date</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">col_date</span>(<span class="at">format =</span> <span class="st">"%d/%m/%Y"</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  .[, <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>]</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(cal) <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"event_name"</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"start_date"</span>,</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"start_time"</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"end_date"</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"end_time"</span>,</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"all_day"</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Caution</strong>: Some of the event-names use characters that are not in the UTF-8 encoding system:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>invalid_utf8_ <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="sc">!</span><span class="fu">is.na</span>(x) <span class="sc">&amp;</span> <span class="fu">is.na</span>(<span class="fu">iconv</span>(x, <span class="st">"UTF-8"</span>, <span class="st">"UTF-8"</span>))</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>baddies <span class="ot">&lt;-</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  cal <span class="sc">%&gt;%</span> </span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">invalid_utf8_</span>(event_name)) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(event_name)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>baddies</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "French Novel on Film: La Princesse de Cl\xe8ves (1961)"                                                                                 
+ [2] "French Novel on Film: Th\xe9r\xe8se Raquin (1953),"                                                                                     
+ [3] "Language Film Screening of Days of Glory (Indig\xe8nes)"                                                                                
+ [4] "Spanish Cinema Day - Las ni\xf1as (2020)"                                                                                               
+ [5] "Leveraging Your \x93Limitations\x94:  Turn Your \x93Weaknesses\x94 Into Wins! Devon Golden, Georgetown City Attorney and 2013 GC alumna"
+ [6] "Francophone Cultures Film Series: Faat Kin\xe9 (2000)"                                                                                  
+ [7] "\x94Silence: A 13th Century Medieval Adventure\x94 Fall Play Presented by Department of Theatre &amp; Film and Maskrafters"                 
+ [8] "\x94Silence: A 13th Century Medieval Adventure\x94 Fall Play Presented by Department of Theatre &amp; Film and Maskrafters"                 
+ [9] "\x94Silence: A 13th Century Medieval Adventure\x94 Fall Play Presented by Department of Theatre &amp; Film and Maskrafters"                 
+[10] "\x94Silence: A 13th Century Medieval Adventure\x94 Fall Play Presented by Department of Theatre &amp; Film and Maskrafters"                 
+[11] "\x94Silence: A 13th Century Medieval Adventure\x94 Fall Play Presented by Department of Theatre &amp; Film and Maskrafters"                 
+[12] "\x94Silence: A 13th Century Medieval Adventure\x94 Fall Play Presented by Department of Theatre &amp; Film and Maskrafters"                 </code></pre>
+</div>
+</div>
+<p>If this is an issue for package <strong>toastui</strong>, then you will need to research how to modify those names. But this article focuses on handling multi-day events, so I’ll just take them out:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>cal <span class="ot">&lt;-</span> </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  cal <span class="sc">%&gt;%</span> </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">invalid_utf8_</span>(event_name))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s examine the structure of the data frame:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(cal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>tibble [501 × 6] (S3: tbl_df/tbl/data.frame)
+ $ event_name: chr [1:501] "Piano Recital" "AIKCU Diversity Summit" "WAGC Luncheon" "National Career Development Day |  Open House" ...
+ $ start_date: Date[1:501], format: "2022-11-13" "2022-11-14" ...
+ $ start_time: 'hms' num [1:501] 15:00:00 08:00:00 12:30:00 09:00:00 ...
+  ..- attr(*, "units")= chr "secs"
+ $ end_date  : Date[1:501], format: "2022-11-13" "2022-11-14" ...
+ $ end_time  : 'hms' num [1:501] 16:00:00 17:00:00 14:00:00 16:00:00 ...
+  ..- attr(*, "units")= chr "secs"
+ $ all_day   : logi [1:501] FALSE FALSE FALSE FALSE FALSE FALSE ...</code></pre>
+</div>
+</div>
+<p><strong>Note</strong>: <code>read_csv()</code> uses a parser that was able to correctly detect the start and end times, and the event duration, as times. On the other hand, I had to provide the correct format for the dates. (See <a href="https://readr.tidyverse.org/reference/parse_datetime.html">here</a> for details.)</p>
+</section>
+<section id="compressing-multi-day-events" class="level2">
+<h2 class="anchored" data-anchor-id="compressing-multi-day-events">Compressing Multi-Day Events</h2>
+<p>We’ll make the simplifying assumption that the only rows that are part of a multi-day event are the rows that are listed in the data as being <code>all_day</code>.</p>
+<p>Our aim is to take rows that have the same value of <code>subject</code> and combine them as needed into multi-day events, where each multi-day event is comprised of the larget possible set of rows such that the values of <code>start_date</code> are consecutive.</p>
+<p>For example, consider the final-exam events:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>finals <span class="ot">&lt;-</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  cal <span class="sc">%&gt;%</span> </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(event_name <span class="sc">==</span> <span class="st">"Final Exams"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div class="reactable html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-245d093357ffbe307c6b" style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-245d093357ffbe307c6b">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"event_name":["Final Exams","Final Exams","Final Exams","Final Exams","Final Exams","Final Exams","Final Exams","Final Exams","Final Exams","Final Exams","Final Exams","Final Exams"],"start_date":["2022-12-08","2022-12-09","2022-12-12","2022-12-13","2023-05-05","2023-05-08","2023-05-09","2023-05-10","2023-12-05","2023-12-06","2023-12-07","2023-12-08"],"start_time":["00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00"],"end_date":["2022-12-08","2022-12-09","2022-12-12","2022-12-13","2023-05-05","2023-05-08","2023-05-09","2023-05-10","2023-12-05","2023-12-06","2023-12-07","2023-12-08"],"end_time":["23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00"],"all_day":[true,true,true,true,true,true,true,true,true,true,true,true]},"columns":[{"id":"event_name","name":"event_name","type":"character"},{"id":"start_date","name":"start_date","type":"Date"},{"id":"start_time","name":"start_time","type":["hms","difftime"]},{"id":"end_date","name":"end_date","type":"Date"},{"id":"end_time","name":"end_time","type":["hms","difftime"]},{"id":"all_day","name":"all_day","type":"logical"}],"dataKey":"72a5046949d179d835fd5af75627c72a"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<p>We want to derive the following multi-day events:</p>
+<ul>
+<li>Fall 2022 finals: December 8-9;</li>
+<li>Fall 2022 finals continued after the weekend: December 12-13;</li>
+<li>Spring 2023 finals: May 5;</li>
+<li>Spring 2023 finals continued: May 8-10;</li>
+<li>Fall 2023 finals: December 5-6.</li>
+</ul>
+<p>We aim to write a function to produce one data frame of events, with multi-day events occupying just one row each.</p>
+<p>First, we’ll write a utility function to decide, for a sorted vector of integers, what “group” of consecutive integers each integer belongs to:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>find_group <span class="ot">&lt;-</span> <span class="cf">function</span>(vec) {</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">length</span>(vec)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (n <span class="sc">==</span> <span class="dv">1</span>) <span class="fu">return</span>(<span class="dv">1</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  group <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  group[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  group_number <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n) {</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (vec[i] <span class="sc">-</span> vec[i<span class="dv">-1</span>] <span class="sc">==</span> <span class="dv">1</span>) {</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>      group[i] <span class="ot">&lt;-</span> group_number</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>      group[i] <span class="ot">&lt;-</span> group_number <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>      group_number <span class="ot">&lt;-</span> group_number <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  group</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Try it out:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>sample_vec <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">10</span>, <span class="dv">11</span>, <span class="dv">12</span>, <span class="dv">15</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">item =</span> sample_vec,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">group =</span> <span class="fu">find_group</span>(sample_vec)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  item group
+1    0     1
+2    1     1
+3    2     1
+4    5     2
+5    6     2
+6   10     3
+7   11     3
+8   12     3
+9   15     4</code></pre>
+</div>
+</div>
+<p>Write a function to compress rows that correspond to one multi-day event into a single row:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>compress_one_event <span class="ot">&lt;-</span> <span class="cf">function</span>(df) {</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">nrow</span>()</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  event <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">slice</span>(<span class="dv">1</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  event[, <span class="st">"end_date"</span>] <span class="ot">&lt;-</span> df[n, <span class="st">"end_date"</span>]</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  event[, <span class="st">"end_time"</span>] <span class="ot">&lt;-</span> df[n, <span class="st">"end_time"</span>]</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  event</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now for the desired compressor function:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>compress_events <span class="ot">&lt;-</span> <span class="cf">function</span>(df) {</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">%&gt;%</span> <span class="fu">ungroup</span>()</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  first_day <span class="ot">&lt;-</span> <span class="fu">min</span>(df <span class="sc">%&gt;%</span> <span class="fu">pull</span>(start_date))</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  df2 <span class="ot">&lt;-</span> </span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    df <span class="sc">%&gt;%</span> </span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(start_date) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">day_diff =</span> <span class="fu">as.numeric</span>(start_date <span class="sc">-</span> first_day))</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  df2<span class="sc">$</span>dg <span class="ot">&lt;-</span> <span class="fu">find_group</span>(df2 <span class="sc">%&gt;%</span> <span class="fu">pull</span>(day_diff))</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  df2 <span class="sc">%&gt;%</span> </span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">split</span>(<span class="at">f =</span> df2<span class="sc">$</span>dg) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">map_dfr</span>(compress_one_event) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(day_diff, dg))</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Note</strong>: I learned that <code>map_dfr()</code> is now superseded so we are supposed to starting learning new ways to do it, see <a href="https://purrr.tidyverse.org/reference/map_dfr.html">here</a>.</p>
+<p>Anyhoo, try it out:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">compress_events</span>(finals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div class="reactable html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-86928c745da4c943e09d" style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-86928c745da4c943e09d">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"event_name":["Final Exams","Final Exams","Final Exams","Final Exams","Final Exams"],"start_date":["2022-12-08","2022-12-12","2023-05-05","2023-05-08","2023-12-05"],"start_time":["00:00:00","00:00:00","00:00:00","00:00:00","00:00:00"],"end_date":["2022-12-09","2022-12-13","2023-05-05","2023-05-10","2023-12-08"],"end_time":["23:59:00","23:59:00","23:59:00","23:59:00","23:59:00"],"all_day":[true,true,true,true,true]},"columns":[{"id":"event_name","name":"event_name","type":"character"},{"id":"start_date","name":"start_date","type":"Date"},{"id":"start_time","name":"start_time","type":["hms","difftime"]},{"id":"end_date","name":"end_date","type":"Date"},{"id":"end_time","name":"end_time","type":["hms","difftime"]},{"id":"all_day","name":"all_day","type":"logical"}],"dataKey":"45a6b39fc5cfc9c4431c0b094da5e448"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</section>
+<section id="processing-all-the-events" class="level2">
+<h2 class="anchored" data-anchor-id="processing-all-the-events">Processing All the Events</h2>
+<p>Now process all the rows of the calendar data table:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>single_day_for_sure <span class="ot">&lt;-</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  cal <span class="sc">%&gt;%</span> </span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>all_day)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>might_require_compression <span class="ot">&lt;-</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  cal <span class="sc">%&gt;%</span> </span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(all_day)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>compressed <span class="ot">&lt;-</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  might_require_compression <span class="sc">%&gt;%</span> </span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">split</span>(<span class="at">f =</span> might_require_compression<span class="sc">$</span>event_name) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map_dfr</span>(compress_events)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>toasted <span class="ot">&lt;-</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  single_day_for_sure <span class="sc">%&gt;%</span> </span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(compressed) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(start_date, start_time)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div class="reactable html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-2e90b40912fa6f9bf5c6" style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-2e90b40912fa6f9bf5c6">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"event_name":["Piano Recital","AIKCU Diversity Summit","WAGC Luncheon","National Career Development Day |  Open House","Men's Recruitment Informational","Full Time Faculty - Committee Meetings","Holiday Open House for Faculty, Staff and Students","A Taste of Home","Thanksgiving Holiday - No Classes","Financial Literacy Workshop","Notes from the tan couch","Band Concert","Honors 200 Poster Parliament","Full Faculty - Division Meetings","World AIDS Day - Bingo Event","Reception for December 2022 Graduates","Tiger Tour Alumni Event - President's Home","'Re(De)Construction' Exhibition Construction","Hanging of the Green","Christmas at Georgetown Event","Concert: Traditions, Old and New","10-Minute Directing PlayFest","Last Day of Class","Finals Throwdown","Reading Day","Senior Comprehensive Reports Due","Faculty Staff Christmas Luncheon","Final Exams","Preview Day","Applications for May 2023 Degree Candidates Due","Final Exams","Grades Due for Fall 2022 @ 11:59 p.m.","Inter Term","Inter Term","Mental Health First Aid Training","MLK Day Program and March","Drop/Add Period","First Day of Class","New Student Orientation","Full Time Faculty - Faculty Meeting","Sorority Recruitment","Sorority Recruitment","Sorority Recruitment","Innovatie Teaching Symposium","Academic Council","Welcome Back Bingo","Founders' Day Convocation","Founders' Day Luncheon","Full Time Faculty - Committee Meetings","Where It Used to Be Blue - Exhibition Reception","Preview Day","Harlem Renaissance Party","Board of Trustees Meeting","Chapel Service","CBF Interest Lunch","Cooperative Baptist Fellowship and CBF Kentucky Fair","Full Faculty - Division Meetings","Emerging Leaders Job Fair","Fighting Stress Through Deep Breathing","Paint With Your Heart","Sigma Kappa's Emerging Leaders Conference","Metacognition Across the Disciplines","Cawthorne Lecture","Greek Week - Can-Struction","Cawthorne Luncheon","Emerging Leaders Resume Workshop","Valentine's Day Trivia","Greek Week - Faculty Appreciation","French Novel on Film: Manon (1949)","How I Met the Pope: Baptists and Catholics Together - Dr. Derek Hatch","Scholars Day","KESDA State Speech Tournament","Academic Progress Checks - Round I","Jo Shoop Women's Symposium - Danni Quintos","Chapel Service","Accelerate Your Awesome: Start-up and Innovation Perspectives","Redding Lecture Dinner","George Walker Redding Lecture","Ash Wednesday Chapel Service","Academic Council","Black History Month Series","Spotlight Career Fair","New Student Orientation for International Students","Belle of the Blue & Beaus Too Scholarship Pageant","Collier Lecture - The Intersection of Story and Science","Black Soil KY - Farm-to-Table Event","Mental Health and Dating Violence Informational","Night Chapel Service","Summer Internship Priority Date","Education Department Unit Meeting","GAC informational","MPC Club Escape Room Night","Full Time Faculty - Committee Meetings","Choir Conductor's Series Concert","Chapel Service","Ministers Reading Group Kick-off","Reception for Sir Malcom","Whatabot GPT? Teaching in the Neural Network Era","Understanding Disabilities Services and Accommodations in the Classroom","Full Faculty - Division Meetings","Coming Out for Air - Art Exhibition Reception","Saturday  Visit Day","Spring Break - No Classes","Academic Progress Checks - Round II","Advising for Fall 2023","Women's History Month Celebration/Speaker","WAGC Luncheon","Danford Thomas Lecture - President of Baylor University Linda Livingstone","Reception for Baylor Alumni and Friends","Senior Celebration","Financial Feats & Flops: A Graduate's Guide to Life After College","French Novel on Film: Dangerous Liaisons (1988)","Full Time Faculty - Faculty Meeting","Orange Table Talk - Women's History Month","Lecture- Sir Malcolm Evans Principal at Regents Park College","Education Advisory Committee Meeting","Oxford Programs Formal Hall Dinner","Preview Day","Spring Academic Internship Registration Deadline","Advanced Registration for Fall 2023","Advising for Fall 2023","Maya Mexico Info Session","Final Date to Drop a Course w/o a grade/ change to Pass/Fail or Audit a Course","Chapel Service","Alumni & Student Networking Event","Federal Law Enforcement Forum","Pi Day Celebration","Day of Giving","Academic Council","Use the Ball, Don't Let the Ball Use You!: Life After Sports and the Athletic Identity of Collegiate Athletes","Sororities Host: Self-Defense Class","Karaoke in the Caf","Too Much Light Makes The Baby Go Blind (30 Plays in 60 Minutes)","Too Much Light Makes The Baby Go Blind (30 Plays in 60 Minutes)","Too Much Light Makes The Baby Go Blind (30 Plays in 60 Minutes)","Advanced Registration for Fall 2023","Holy Week Unity Worship Service","Full Time Faculty - Committee Meetings","The Entrepreneurial Spirit Workshop","Good Friday - No Classes","Community Good Friday Service","Greek Week","Undergraduate Research Presentations","Career Closet","Greek Week - FSL Mix Up","Chapel Service","Prejudice and Bias in the Classroom","Greek Week - FSL Jeopardy","Final Date to Drop a Couse with W","French Novel on Film: Madame Bovary (1949),","Cheerleading Banquet","Greek Week - Pool Games","Health Scholars - Dr. Reese","Full Faculty - Division Meetings","Summer Job & Internship Fair","Greek Week - Athletics Appreciation","Health Scholars suture clinic","Greek Week - Family Dinner","Spring Student Showcase","Greek Week - Staff Appreciation","Greek Week - FSL Games","Too Much Light Makes The Baby Go Blind (30 Plays in 60 Minutes)","Saturday  Visit Day","Too Much Light Makes The Baby Go Blind (30 Plays in 60 Minutes)","Too Much Light Makes The Baby Go Blind (30 Plays in 60 Minutes)","WAGC Birthday Celebration","Tie Dye with GAC","Full Time Faculty - Faculty Meeting","'to be so' Art Exhibition Reception","Preview Day","Phi Kappa Phi Induction","Academic Honors Day","Honors Senior Poster Presentation","Grubfest","Around the World - Symphonic Band Spring Concert","Real Talk: an open discussion about sexual assault","From Coffee Farms to Climate Policy: An Earth Day Chat and Q&A about Careers and Research in Environmental Science","Tea and Crumpets with Sigma Tau Delta","Arbor Day Event","Board of Trustees Meeting","Choir Concert: Give the People What They Want!","PAWS","Last Chapel","Last Day of Class","Reading Day","Senior Comprehensive Reports Due","Faculty and Staff Update","Final Exams","KREA Advisory Board","Final Exams","Senior Grades Due at Noon","Senior Picnic","Commencement Rehearsal","Commencement Reception for Graduates and Their Families","Baccalaureate","Commencement","May Term","Grades Due for Spring 2023 at 11:59 p.m.","Assessment Workshop - Humanities and Fine Arts","Assessment Workshop - Social Sciences and Professional Studies","Assessment Workshop - Natural Sciences","May Term","Summer I Term","Summer I Term","PAWS","Final Date to Drop a Summer I Course w/o a Grade","Summer I Term","Faithways","Summer I Term","Hall of Fame Brunch","Summer I Term","PAWS","Summer I Term","Summer I Term","Summer II Term","PAWS","Summer II Term","Final Date to Drop a Summer II Course w/o a Grade","Board of Trustees Meeting","Summer II Term","Summer II Term","Summer II Term","Department Chairs Workshop","New Full Time Faculty Workshop","All New Faculty Workshop","All Full Time Faculty Workshop","All Full Time Faculty Lunch","Diversity and Inclusion Training for All Faculty","Faculty/Staff Ice Cream Social","New Student Orientation","Upperclassmen Move-In","Drop / Add Period","First Day of Class","Education Department Unit Meeting","Faculty Forum - FDN112 Discussion","Brian Evans' Reception","First Gen Academy: Proud to be First!","Job Fair","The Four-Year Plan","Foreign Film Series -  Sugar Cane Alley","Full Time Faculty Meeting","Study Abroad Info Session","Opening Convocation","Opening Convocation Luncheon","Mathematics, Physics and Computer Science (MPC) - Beginning of Year Event","Annual Involvement Fair/Fish Fry","Academic Council","A counterweight: work by celeste lewis and lennon michalski' exhibition reception","Labor Day - No Classes","Freshman Seminar Lecture- You Have Arrived! Emotional Wellness Tips to Welcome Change: Bethany Farley","Study Abroad Fair","Faculty Committee Meetings","Songfest Information Session","TLC Metacognition Mondays","Diversity and Inclusion / Leadership Event - Tubby Smith","Faculty Division Meetings","Faculty/Staff Update","Abstract Nature: work by Suyun Son' Exhibition Reception","Family Weekend","Grant Workshop - Guide to Finding Sources","Freshman Lecture - Financial Planning : Mark Ledford","WAGC Dinner Meeting","Night Chapel Service","Graves Center Resume Building Workshop","Hope4Tomorrow - Minority Mental Health","Full Time Faculty Meeting","Hispanic Heritage Month Extravaganza","'Curiosities of Georgetown' Exhibition Reception","Academic Progress Checks - Round I","KyCPA Interview Day","Tiger Preview Day","Academic Progress Checks - Round I","FDN 111 Connections: Tim Gabrielli, 'Was Jesus a Human Who Died on the Cross? The Nicene Creed in Context'","Governor's Scholars Program Informational Session","Foreign Film Screening - The Battle of Algiers (La battaglia di Algeri)","Chapel Service - Rooted in Hope","Georgetown/Scott County Chamber of Commerce Networking Afternoon","Fall Break - No Classes","Offices Closed  - Fall Break","Young Democrats Voter Registration and Information Event","Chapel Service","Academic Council","Long Long Game Game' Art by Elysia Mann, Exhibition Reception","Tiger Preview Day","Grant Workshop - Guide to Grant Writing (Form and Content of a Successful Proposal)","TLC Metacognition Mondays","Freshman Seminar Lecture - Diversity and Inclusion : Deidra Dennie","Ministers Reading Group Kickoff","World Languages Oktoberfest/ Advising Drop-In","Francophone Cultures Film Series: Lumumba","Faculty Committee Meetings","Homecoming 2023 - Distinguished Alumni Awards","No Classes - Songfest","Faculty Committee - Tenure and Promotion Informational Session","Homecoming 2023 - Songfest","Brandon D. Lawson Scholarship Gala","Homecoming 2023 - Homecoming Day","Golden Tigers Brunch","Faculty Meet & Greet as part of Homecoming","Homecoming 2023","Alumni Chorus Concert","Academic Progress Checks - Round II","Advising for Spring 2024","Chapel Service - Rooted in Prayer","WAGC Lunch Meeting","Prep Talks:  Telling Your Story - on applications and in interviews","MPC Club Escape Room Night","Faculty Division Meetings","Grant Workshop - Guide to Grant Budgets","Screening of Les Diaboliques (1955)","October Board of Trustees Meeting","Fall Academic Internship Registration Deadline","Advanced Registration for Seniors","Advanced Registration for Spring 2024","Advising for Spring 2024","Final Date to Drop a Course w/o a grade/ change to Pass/Fail or Audit a Course","Advanced Registration for Juniors","Context of the Civil Rights Movement in America","Full Time Faculty Meeting","Tiger Preview Day","Colors of Cancer 5K","Advanced Registration for Sophomores","Advanced Registration for Spring 2024","Empowering Excellence: Insights, Inspiration, and Impact From Women-Owned Businesses","Practical Strategies for an Inclusive Classroom","Chapel Service - Rooted in Promise","Trick or Treat at President's House","Advanced Registration for Freshmen","Seminary Day","Academic Council","Toolkit for Academic Success","Senior Comprehensive Reports Due","Diversity and Inclusion / Leadership Event","Faculty Committee Meetings","Final Date to Drop a Couse with W","TLC Metacognition Mondays","Chapel Service - Rooted in Faith","WAGC Lunch Meeting","Free Pancakes and Night Chapel Service","Jump at the Chance to Learn about Diabetes","Francophone Cultures Film Series: Indochine (1992)","Faculty Division Meetings","Alex's Lemonade Stand Fundraiser","Seminar Show: Art Exhibition","Symphonic Winds Annual Cookie Concert","Study Abroad in Austria with Dr. Dummer!","Offices Closed -  Thanksgiving Holiday","Thanksgiving Holiday - No Classes","Start Singing with Gospel Music","Honors Freshman Poster Parliament","Prep Talks - Student Professional Development Series","Full Time Faculty Meeting","Reception for December 2023 Graduates","Hanging of the Green","Last Day of Class","Christmas at Georgetown - Memorial Drive","Applications for May 2024 Degree Candidates Due","Reading Day","Final Exams","Grades Due for Fall 2023 @ 11:59 p.m.","Offices Closed - Christmas Holiday","Offices Closed - Christmas Holiday","Inter Term","Offices Closed - Christmas Holiday","Inter Term","Inter Term"],"start_date":["2022-11-13","2022-11-14","2022-11-15","2022-11-16","2022-11-17","2022-11-17","2022-11-17","2022-11-17","2022-11-21","2022-11-29","2022-11-29","2022-11-29","2022-11-30","2022-12-01","2022-12-01","2022-12-01","2022-12-01","2022-12-01","2022-12-01","2022-12-03","2022-12-04","2022-12-05","2022-12-06","2022-12-06","2022-12-07","2022-12-07","2022-12-07","2022-12-08","2022-12-09","2022-12-12","2022-12-12","2022-12-16","2022-12-26","2023-01-02","2023-01-10","2023-01-16","2023-01-17","2023-01-17","2023-01-17","2023-01-19","2023-01-19","2023-01-20","2023-01-21","2023-01-24","2023-01-26","2023-01-30","2023-01-31","2023-01-31","2023-02-02","2023-02-02","2023-02-03","2023-02-03","2023-02-04","2023-02-07","2023-02-08","2023-02-09","2023-02-09","2023-02-09","2023-02-09","2023-02-09","2023-02-10","2023-02-13","2023-02-14","2023-02-14","2023-02-14","2023-02-14","2023-02-14","2023-02-15","2023-02-15","2023-02-16","2023-02-17","2023-02-18","2023-02-20","2023-02-20","2023-02-21","2023-02-21","2023-02-21","2023-02-21","2023-02-22","2023-02-23","2023-02-23","2023-02-23","2023-02-24","2023-02-25","2023-02-28","2023-02-28","2023-02-28","2023-02-28","2023-03-01","2023-03-01","2023-03-01","2023-03-01","2023-03-02","2023-03-05","2023-03-07","2023-03-07","2023-03-08","2023-03-08","2023-03-09","2023-03-09","2023-03-09","2023-03-11","2023-03-13","2023-03-20","2023-03-20","2023-03-21","2023-03-21","2023-03-21","2023-03-21","2023-03-22","2023-03-22","2023-03-22","2023-03-23","2023-03-23","2023-03-23","2023-03-23","2023-03-23","2023-03-24","2023-03-26","2023-03-27","2023-03-27","2023-03-27","2023-03-28","2023-03-28","2023-03-28","2023-03-29","2023-03-29","2023-03-30","2023-03-30","2023-03-30","2023-03-30","2023-03-30","2023-03-31","2023-04-01","2023-04-02","2023-04-03","2023-04-04","2023-04-06","2023-04-06","2023-04-07","2023-04-07","2023-04-10","2023-04-10","2023-04-10","2023-04-10","2023-04-11","2023-04-11","2023-04-11","2023-04-12","2023-04-12","2023-04-12","2023-04-12","2023-04-13","2023-04-13","2023-04-13","2023-04-13","2023-04-13","2023-04-13","2023-04-13","2023-04-14","2023-04-14","2023-04-14","2023-04-15","2023-04-15","2023-04-16","2023-04-18","2023-04-18","2023-04-20","2023-04-20","2023-04-21","2023-04-23","2023-04-25","2023-04-25","2023-04-25","2023-04-25","2023-04-26","2023-04-26","2023-04-27","2023-04-28","2023-04-29","2023-04-30","2023-05-01","2023-05-02","2023-05-03","2023-05-04","2023-05-04","2023-05-04","2023-05-05","2023-05-05","2023-05-08","2023-05-11","2023-05-11","2023-05-12","2023-05-12","2023-05-12","2023-05-13","2023-05-15","2023-05-16","2023-05-16","2023-05-18","2023-05-19","2023-05-22","2023-05-30","2023-06-05","2023-06-10","2023-06-12","2023-06-12","2023-06-17","2023-06-19","2023-06-21","2023-06-26","2023-06-28","2023-07-03","2023-07-05","2023-07-10","2023-07-14","2023-07-17","2023-07-21","2023-07-21","2023-07-24","2023-07-31","2023-08-07","2023-08-08","2023-08-08","2023-08-08","2023-08-10","2023-08-10","2023-08-10","2023-08-10","2023-08-12","2023-08-13","2023-08-16","2023-08-16","2023-08-16","2023-08-17","2023-08-18","2023-08-19","2023-08-21","2023-08-22","2023-08-23","2023-08-24","2023-08-24","2023-08-29","2023-08-29","2023-08-29","2023-08-30","2023-08-31","2023-08-31","2023-09-04","2023-09-05","2023-09-05","2023-09-07","2023-09-07","2023-09-11","2023-09-12","2023-09-14","2023-09-14","2023-09-14","2023-09-16","2023-09-18","2023-09-19","2023-09-19","2023-09-19","2023-09-20","2023-09-20","2023-09-21","2023-09-21","2023-09-21","2023-09-22","2023-09-22","2023-09-23","2023-09-25","2023-09-25","2023-09-25","2023-09-25","2023-09-26","2023-09-26","2023-09-28","2023-09-29","2023-10-02","2023-10-03","2023-10-05","2023-10-05","2023-10-06","2023-10-09","2023-10-09","2023-10-10","2023-10-10","2023-10-10","2023-10-11","2023-10-12","2023-10-12","2023-10-13","2023-10-13","2023-10-13","2023-10-13","2023-10-14","2023-10-14","2023-10-14","2023-10-15","2023-10-15","2023-10-16","2023-10-16","2023-10-17","2023-10-17","2023-10-18","2023-10-18","2023-10-19","2023-10-19","2023-10-20","2023-10-21","2023-10-22","2023-10-23","2023-10-23","2023-10-23","2023-10-23","2023-10-25","2023-10-25","2023-10-26","2023-10-27","2023-10-28","2023-10-30","2023-10-30","2023-10-30","2023-10-30","2023-10-31","2023-10-31","2023-11-01","2023-11-02","2023-11-02","2023-11-02","2023-11-06","2023-11-07","2023-11-09","2023-11-10","2023-11-13","2023-11-14","2023-11-14","2023-11-14","2023-11-15","2023-11-15","2023-11-16","2023-11-16","2023-11-16","2023-11-16","2023-11-21","2023-11-22","2023-11-22","2023-11-28","2023-11-28","2023-11-29","2023-11-30","2023-11-30","2023-11-30","2023-12-01","2023-12-02","2023-12-04","2023-12-04","2023-12-05","2023-12-12","2023-12-22","2023-12-25","2023-12-26","2024-01-01","2024-01-02","2024-01-08"],"start_time":["15:00:00","08:00:00","12:30:00","09:00:00","11:00:00","11:00:00","15:00:00","17:00:00","00:00:00","11:00:00","17:00:00","19:00:00","16:00:00","11:00:00","11:00:00","16:00:00","17:00:00","17:00:00","19:00:00","16:00:00","16:00:00","20:00:00","00:00:00","20:00:00","00:00:00","00:00:00","11:30:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","08:00:00","15:00:00","00:00:00","00:00:00","11:00:00","11:00:00","16:00:00","16:00:00","16:00:00","11:00:00","11:00:00","19:00:00","11:00:00","12:00:00","11:00:00","17:00:00","00:00:00","21:00:00","08:00:00","11:00:00","11:00:00","10:45:00","11:00:00","11:00:00","17:30:00","19:00:00","00:00:00","16:00:00","11:00:00","11:00:00","12:00:00","12:00:00","18:00:00","09:00:00","18:00:00","15:30:00","00:00:00","00:00:00","00:00:00","15:30:00","11:00:00","11:00:00","17:00:00","19:00:00","18:30:00","11:00:00","11:00:00","13:00:00","14:30:00","18:00:00","11:00:00","11:00:00","11:00:00","18:30:00","00:00:00","14:30:00","18:00:00","18:00:00","11:00:00","16:00:00","11:00:00","12:00:00","08:00:00","15:00:00","11:00:00","11:00:00","17:00:00","00:00:00","00:00:00","00:00:00","00:00:00","11:00:00","12:30:00","15:30:00","17:00:00","10:00:00","17:30:00","18:15:00","11:00:00","11:00:00","16:00:00","17:00:00","19:00:00","00:00:00","00:00:00","00:00:00","00:00:00","15:00:00","00:00:00","11:00:00","19:00:00","15:00:00","17:00:00","00:00:00","11:00:00","11:00:00","11:00:00","12:00:00","19:00:00","19:00:00","19:00:00","00:00:00","19:00:00","11:00:00","11:00:00","00:00:00","19:00:00","00:00:00","11:00:00","13:00:00","17:00:00","11:00:00","12:00:00","19:00:00","00:00:00","18:00:00","18:00:00","20:30:00","11:00:00","11:00:00","11:00:00","11:00:00","11:00:00","17:00:00","18:00:00","09:00:00","17:00:00","19:00:00","00:00:00","19:00:00","19:00:00","15:00:00","17:00:00","11:00:00","17:00:00","00:00:00","16:00:00","11:00:00","16:00:00","18:00:00","19:00:00","17:00:00","18:00:00","10:30:00","13:00:00","08:00:00","16:00:00","00:00:00","11:00:00","00:00:00","00:00:00","00:00:00","11:00:00","00:00:00","10:00:00","00:00:00","08:00:00","17:00:00","10:00:00","17:00:00","19:00:00","10:00:00","00:00:00","00:00:00","14:00:00","14:00:00","14:00:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","09:30:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","08:00:00","00:00:00","00:00:00","00:00:00","12:00:00","15:00:00","16:00:00","09:00:00","12:30:00","13:15:00","15:00:00","00:00:00","00:00:00","00:00:00","00:00:00","15:30:00","11:00:00","11:30:00","09:00:00","15:00:00","11:00:00","18:00:00","11:00:00","15:00:00","11:00:00","12:00:00","18:00:00","16:00:00","11:00:00","18:00:00","00:00:00","11:00:00","11:00:00","11:00:00","11:00:00","15:30:00","11:00:00","11:00:00","16:00:00","17:00:00","00:00:00","15:00:00","11:00:00","18:00:00","20:00:00","16:00:00","16:00:00","11:00:00","16:00:00","17:00:00","00:00:00","00:00:00","00:00:00","00:00:00","15:00:00","18:00:00","18:00:00","11:00:00","16:00:00","00:00:00","00:00:00","11:00:00","11:00:00","11:00:00","17:00:00","12:00:00","14:30:00","15:30:00","11:00:00","11:30:00","15:00:00","18:00:00","11:00:00","18:30:00","00:00:00","10:00:00","19:00:00","19:00:00","00:00:00","10:00:00","10:00:00","00:00:00","16:00:00","00:00:00","00:00:00","11:00:00","12:30:00","16:00:00","18:00:00","11:00:00","15:00:00","18:00:00","08:00:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","18:00:00","11:00:00","12:00:00","00:00:00","00:00:00","00:00:00","15:00:00","15:00:00","11:00:00","18:00:00","00:00:00","10:00:00","11:00:00","11:00:00","00:00:00","11:00:00","11:00:00","00:00:00","15:30:00","11:00:00","12:30:00","19:30:00","17:00:00","18:00:00","11:00:00","17:30:00","18:00:00","19:00:00","12:00:00","00:00:00","00:00:00","11:00:00","16:00:00","16:00:00","11:00:00","17:00:00","19:00:00","00:00:00","16:30:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00","00:00:00"],"end_date":["2022-11-13","2022-11-14","2022-11-15","2022-11-16","2022-11-17","2022-11-17","2022-11-17","2022-11-17","2022-11-25","2022-11-29","2022-11-29","2022-11-29","2022-11-30","2022-12-01","2022-12-01","2022-12-01","2022-12-01","2022-12-01","2022-12-01","2022-12-03","2022-12-04","2022-12-05","2022-12-06","2022-12-06","2022-12-07","2022-12-07","2022-12-07","2022-12-09","2022-12-09","2022-12-12","2022-12-13","2022-12-16","2022-12-30","2023-01-06","2023-01-10","2023-01-16","2023-01-20","2023-01-17","2023-01-17","2023-01-19","2023-01-19","2023-01-20","2023-01-21","2023-01-24","2023-01-26","2023-01-30","2023-01-31","2023-01-31","2023-02-02","2023-02-02","2023-02-03","2023-02-03","2023-02-04","2023-02-07","2023-02-08","2023-02-09","2023-02-09","2023-02-09","2023-02-09","2023-02-09","2023-02-10","2023-02-13","2023-02-14","2023-02-14","2023-02-14","2023-02-14","2023-02-14","2023-02-15","2023-02-15","2023-02-16","2023-02-17","2023-02-19","2023-02-20","2023-02-20","2023-02-21","2023-02-21","2023-02-21","2023-02-21","2023-02-22","2023-02-23","2023-02-23","2023-02-23","2023-02-24","2023-02-25","2023-02-28","2023-02-28","2023-02-28","2023-02-28","2023-03-01","2023-03-01","2023-03-01","2023-03-01","2023-03-02","2023-03-05","2023-03-07","2023-03-07","2023-03-08","2023-03-08","2023-03-09","2023-03-09","2023-03-09","2023-03-11","2023-03-17","2023-03-20","2023-03-24","2023-03-21","2023-03-21","2023-03-21","2023-03-21","2023-03-22","2023-03-22","2023-03-22","2023-03-23","2023-03-23","2023-03-23","2023-03-23","2023-03-23","2023-03-24","2023-03-26","2023-03-31","2023-03-28","2023-03-27","2023-03-28","2023-03-28","2023-03-28","2023-03-29","2023-03-29","2023-03-30","2023-03-30","2023-03-30","2023-03-30","2023-03-30","2023-03-31","2023-04-01","2023-04-02","2023-04-06","2023-04-04","2023-04-06","2023-04-06","2023-04-07","2023-04-07","2023-04-14","2023-04-10","2023-04-10","2023-04-10","2023-04-11","2023-04-11","2023-04-11","2023-04-12","2023-04-12","2023-04-12","2023-04-12","2023-04-13","2023-04-13","2023-04-13","2023-04-13","2023-04-13","2023-04-13","2023-04-13","2023-04-14","2023-04-14","2023-04-14","2023-04-15","2023-04-15","2023-04-16","2023-04-18","2023-04-18","2023-04-20","2023-04-20","2023-04-21","2023-04-23","2023-04-25","2023-04-25","2023-04-25","2023-04-25","2023-04-26","2023-04-26","2023-04-27","2023-04-28","2023-04-29","2023-04-30","2023-05-01","2023-05-02","2023-05-03","2023-05-04","2023-05-04","2023-05-04","2023-05-05","2023-05-05","2023-05-10","2023-05-11","2023-05-11","2023-05-12","2023-05-12","2023-05-12","2023-05-13","2023-05-19","2023-05-16","2023-05-16","2023-05-18","2023-05-19","2023-05-26","2023-06-02","2023-06-09","2023-06-10","2023-06-12","2023-06-16","2023-06-23","2023-06-23","2023-06-21","2023-06-30","2023-06-28","2023-07-03","2023-07-05","2023-07-14","2023-07-14","2023-07-21","2023-07-21","2023-07-21","2023-07-28","2023-08-04","2023-08-11","2023-08-08","2023-08-08","2023-08-08","2023-08-10","2023-08-10","2023-08-10","2023-08-10","2023-08-15","2023-08-13","2023-08-18","2023-08-16","2023-08-16","2023-08-17","2023-08-18","2023-08-19","2023-08-21","2023-08-22","2023-08-23","2023-08-24","2023-08-24","2023-08-29","2023-08-29","2023-08-29","2023-08-30","2023-08-31","2023-08-31","2023-09-04","2023-09-05","2023-09-05","2023-09-07","2023-09-07","2023-09-11","2023-09-12","2023-09-14","2023-09-14","2023-09-14","2023-09-17","2023-09-18","2023-09-19","2023-09-19","2023-09-19","2023-09-20","2023-09-20","2023-09-21","2023-09-21","2023-09-21","2023-09-22","2023-09-22","2023-09-23","2023-09-27","2023-09-25","2023-09-25","2023-09-25","2023-09-26","2023-09-26","2023-09-29","2023-09-29","2023-10-02","2023-10-03","2023-10-05","2023-10-05","2023-10-06","2023-10-09","2023-10-09","2023-10-10","2023-10-10","2023-10-10","2023-10-11","2023-10-12","2023-10-12","2023-10-13","2023-10-13","2023-10-13","2023-10-13","2023-10-14","2023-10-14","2023-10-14","2023-10-15","2023-10-15","2023-10-16","2023-10-20","2023-10-17","2023-10-17","2023-10-18","2023-10-18","2023-10-19","2023-10-19","2023-10-20","2023-10-21","2023-10-22","2023-10-23","2023-10-27","2023-10-24","2023-10-23","2023-10-25","2023-10-25","2023-10-26","2023-10-27","2023-10-28","2023-10-30","2023-11-02","2023-10-30","2023-10-30","2023-10-31","2023-10-31","2023-11-01","2023-11-02","2023-11-02","2023-11-02","2023-11-06","2023-11-07","2023-11-09","2023-11-10","2023-11-13","2023-11-14","2023-11-14","2023-11-14","2023-11-15","2023-11-15","2023-11-16","2023-11-16","2023-11-16","2023-11-16","2023-11-21","2023-11-24","2023-11-24","2023-11-28","2023-11-28","2023-11-29","2023-11-30","2023-11-30","2023-11-30","2023-12-01","2023-12-02","2023-12-04","2023-12-04","2023-12-08","2023-12-12","2023-12-22","2023-12-29","2023-12-29","2024-01-01","2024-01-05","2024-01-12"],"end_time":["16:00:00","17:00:00","14:00:00","16:00:00","11:45:00","12:00:00","17:00:00","19:00:00","23:59:00","12:00:00","19:00:00","19:00:00","18:00:00","12:00:00","12:00:00","18:00:00","18:30:00","19:00:00","20:15:00","18:00:00","16:00:00","22:00:00","23:59:00","22:30:00","23:59:00","23:59:00","13:30:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","16:00:00","15:00:00","23:59:00","23:59:00","12:00:00","12:00:00","00:00:00","00:00:00","00:00:00","12:00:00","12:00:00","20:00:00","12:00:00","14:00:00","12:00:00","19:00:00","23:59:00","23:30:00","16:00:00","12:00:00","13:00:00","12:45:00","12:00:00","13:00:00","17:30:00","20:00:00","23:59:00","17:00:00","12:00:00","12:00:00","14:00:00","14:00:00","19:00:00","11:00:00","18:00:00","15:30:00","23:59:00","23:59:00","23:59:00","16:30:00","12:00:00","12:00:00","18:30:00","19:00:00","19:30:00","12:00:00","12:00:00","17:30:00","15:30:00","18:00:00","12:00:00","12:00:00","12:00:00","19:30:00","23:59:00","17:00:00","19:00:00","21:00:00","12:00:00","16:00:00","12:00:00","13:00:00","09:00:00","16:00:00","12:00:00","12:00:00","19:00:00","23:59:00","23:59:00","23:59:00","23:59:00","13:00:00","14:00:00","16:30:00","18:30:00","17:00:00","19:00:00","18:15:00","12:00:00","12:00:00","17:00:00","20:00:00","21:00:00","23:59:00","23:59:00","23:59:00","23:59:00","16:00:00","23:59:00","12:00:00","21:00:00","15:00:00","18:00:00","23:59:00","12:00:00","12:00:00","12:00:00","13:00:00","19:00:00","19:00:00","19:00:00","23:59:00","20:00:00","12:00:00","13:00:00","23:59:00","20:00:00","23:59:00","11:50:00","16:00:00","19:00:00","12:00:00","13:00:00","21:00:00","23:59:00","18:00:00","19:00:00","22:30:00","12:00:00","12:00:00","13:00:00","13:00:00","12:00:00","19:00:00","20:00:00","11:00:00","19:00:00","19:00:00","23:59:00","19:00:00","19:00:00","17:00:00","18:00:00","12:00:00","18:00:00","23:59:00","17:00:00","12:00:00","18:00:00","20:00:00","20:00:00","18:30:00","19:00:00","12:00:00","14:00:00","16:00:00","16:00:00","23:59:00","12:00:00","23:59:00","23:59:00","23:59:00","12:00:00","23:59:00","14:00:00","23:59:00","09:00:00","18:30:00","12:00:00","18:00:00","19:00:00","10:00:00","23:59:00","23:59:00","16:00:00","16:00:00","16:00:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","11:30:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","16:00:00","23:59:00","23:59:00","23:59:00","15:00:00","16:00:00","17:00:00","12:30:00","13:00:00","14:30:00","17:00:00","23:59:00","23:59:00","23:59:00","23:59:00","17:00:00","12:00:00","13:00:00","12:00:00","17:00:00","12:00:00","20:30:00","12:00:00","15:50:00","12:00:00","14:00:00","19:30:00","19:00:00","12:00:00","20:00:00","23:59:00","12:00:00","13:00:00","12:00:00","12:00:00","16:30:00","12:00:00","12:00:00","17:00:00","19:00:00","23:59:00","15:00:00","12:00:00","20:30:00","21:00:00","17:00:00","17:30:00","12:00:00","19:00:00","19:00:00","23:59:00","23:59:00","23:59:00","23:59:00","16:00:00","20:00:00","20:30:00","12:00:00","18:00:00","23:59:00","23:59:00","12:00:00","12:00:00","12:00:00","19:00:00","12:00:00","14:30:00","16:30:00","12:00:00","13:00:00","16:30:00","20:30:00","12:00:00","20:00:00","23:59:00","11:00:00","21:00:00","00:00:00","23:59:00","12:30:00","12:00:00","23:59:00","17:00:00","23:59:00","23:59:00","12:00:00","14:00:00","17:00:00","21:00:00","12:00:00","15:00:00","20:30:00","16:00:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","18:00:00","12:00:00","12:00:00","23:59:00","23:59:00","23:59:00","16:00:00","16:00:00","12:00:00","20:00:00","23:59:00","14:00:00","12:00:00","12:00:00","23:59:00","12:00:00","12:00:00","23:59:00","16:30:00","12:00:00","14:00:00","19:30:00","17:00:00","21:00:00","12:00:00","17:30:00","18:00:00","19:00:00","12:45:00","23:59:00","23:59:00","12:00:00","18:00:00","17:00:00","12:00:00","18:00:00","20:00:00","23:59:00","18:00:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00","23:59:00"],"all_day":[false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,false,false,false,true,false,true,true,false,true,true,true,true,true,true,true,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,true,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,false,false,true,true,true,true,false,false,false,false,false,false,false,false,false,false,false,false,true,true,true,true,false,true,false,false,false,false,true,false,false,false,false,false,false,false,true,false,false,false,true,false,true,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,false,true,false,true,true,true,false,true,false,true,false,false,false,false,false,false,true,true,false,false,false,true,true,true,true,true,true,true,true,false,true,true,true,true,true,true,true,true,false,true,true,true,false,false,false,false,false,false,false,true,true,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,true,true,true,true,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,true,false,false,false,true,false,false,true,false,true,true,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,true,true,true,false,false,false,false,true,false,false,false,true,false,false,true,false,false,false,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,true,false,true,true,true,true,true,true,true,true,true,true]},"columns":[{"id":"event_name","name":"event_name","type":"character"},{"id":"start_date","name":"start_date","type":"Date"},{"id":"start_time","name":"start_time","type":["hms","difftime"]},{"id":"end_date","name":"end_date","type":"Date"},{"id":"end_time","name":"end_time","type":["hms","difftime"]},{"id":"all_day","name":"all_day","type":"logical"}],"dataKey":"fcbcaecc33d3f7747ca88e1d75660cdb"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    const typesetMath = (el) => {
+      if (window.MathJax) {
+        // MathJax Typeset
+        window.MathJax.typeset([el]);
+      } else if (window.katex) {
+        // KaTeX Render
+        var mathElements = el.getElementsByClassName("math");
+        var macros = [];
+        for (var i = 0; i < mathElements.length; i++) {
+          var texText = mathElements[i].firstChild;
+          if (mathElements[i].tagName == "SPAN") {
+            window.katex.render(texText.data, mathElements[i], {
+              displayMode: mathElements[i].classList.contains('display'),
+              throwOnError: false,
+              macros: macros,
+              fleqn: false
+            });
+          }
+        }
+      }
+    }
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        for (let i = 0; i < 2; i++) {
+          container.appendChild(note.children[i].cloneNode(true));
+        }
+        typesetMath(container);
+        return container.innerHTML
+      } else {
+        typesetMath(note);
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      typesetMath(note);
+      return note.innerHTML;
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
