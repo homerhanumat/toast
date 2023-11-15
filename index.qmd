@@ -12,7 +12,7 @@ library(reactable)
 
 ## Data Import
 
-We read in the data and remove columsn that we won't need.  We also change some column names to valid names in R:
+We read in the data and remove columns that we won't need.  We also change some column names to valid names in R:
 
 ```{r}
 cal <- 
@@ -154,13 +154,15 @@ compress_events <- function(df) {
     mutate(day_diff = as.numeric(start_date - first_day))
   df2$dg <- find_group(df2 %>% pull(day_diff))
   df2 %>% 
-    split(f = df2$dg) %>% 
-    map_dfr(compress_one_event) %>% 
+    group_by(dg) %>% 
+    group_split() %>% 
+    map(compress_one_event) %>% 
+    list_rbind() %>% 
     select(-c(day_diff, dg))
 }
 ```
 
-**Note**:  I learned that `map_dfr()` is now superseded so we are supposed to starting learning new ways to do it, see [here](https://purrr.tidyverse.org/reference/map_dfr.html).
+**Note**:  I learned that `map_dfr()` is now superseded so I taught myself the new ways to do it, see [here](https://purrr.tidyverse.org/reference/map_dfr.html).  
 
 Anyhoo, try it out:
 
@@ -187,8 +189,10 @@ might_require_compression <-
   filter(all_day)
 compressed <-
   might_require_compression %>% 
-  split(f = might_require_compression$event_name) %>% 
-  map_dfr(compress_events)
+  group_by(event_name) %>% 
+  group_split() %>% 
+  map(compress_events) %>% 
+  list_rbind()
 toasted <-
   single_day_for_sure %>% 
   bind_rows(compressed) %>% 
